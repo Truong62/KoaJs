@@ -11,16 +11,17 @@ function getOne(id) {
 
 function add(data) {
   let id;
-  while (todos.some((todo) => todo.id === id)) {
+  do {
     id = Math.floor(Math.random() * 1000);
-  }
+  }while (todos.some((todo) => todo.id === id))
   const dataNew = [{ id, ...data }, ...todos];
-  return fs.writeFileSync(
+  fs.writeFileSync(
     "./src/database/todoList.json",
     JSON.stringify({
       data: dataNew,
     })
   );
+  return dataNew;
 }
 function updateById(id, newData) {
   const todo = todos.find((product) => product.id === parseInt(id));

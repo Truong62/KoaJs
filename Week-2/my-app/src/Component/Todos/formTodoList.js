@@ -1,14 +1,15 @@
 import React from 'react';
 import {useTodoCrud} from "./TodoCrud";
 
-function AddFormTodoList() {
+function AddFormTodoList({setdatas}) {
     const { addTodo } = useTodoCrud();
     const [value, setValue] = React.useState("");
 
-    const handleSubmit = e => {
+    const handleSubmit =async e => {
         e.preventDefault();
         if (!value) return;
-        addTodo(value);
+        const dataNew =  await addTodo(value);
+        setdatas(dataNew)
         setValue("");
     };
     return (

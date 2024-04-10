@@ -23,11 +23,7 @@ async function getTodos(ctx) {
     }
 }
 
-/**
- *
- * @param ctx
- * @returns {Promise<{data: {author: string, name: string, id: number}}|{success: boolean, error: *}|{message: string, status: string}>}
- */
+
 async function getTodo(ctx) {
     try {
         const { id } = ctx.params;
@@ -49,11 +45,11 @@ async function getTodo(ctx) {
 async function save(ctx) {
     try {
         const postData = ctx.request.body;
-        await add(postData);
-
+        const req =  await add(postData);
         ctx.status = 201;
         return ctx.body = {
-            success: true
+            success: true,
+            data:req
         }
     } catch (e) {
         return ctx.body = {
