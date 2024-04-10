@@ -18,12 +18,11 @@ import useFetchApi from "../../Hook/useFetchApi";
 import { useState, useCallback } from "react";
 
 function TodoList() {
-  const { datas,setDatas } = useFetchApi(
+  const { datas, setDatas } = useFetchApi(
     "http://localhost:5001/api/todolist/"
   );
 
   const [selectedItems, setSelectedItems] = useState([]);
-
   const resourceName = {
     singular: "Todo",
     plural: "Todos",
@@ -32,7 +31,23 @@ function TodoList() {
   const promotedBulkActions = [
     {
       content: "Complete",
-      onAction: () => console.log("Todo: implement bulk edit"),
+      onAction: async () => {
+        const updatedItems = await Promise.all(
+          selectedItems.map(async (item) => {
+            const req = await updateTodo(item);
+            return req;
+          })
+        );
+        setDatas((prev) =>
+          prev.map((prevItem) => {
+            const updatedItem = updatedItems.find(
+              (item) => item.id === prevItem.id
+            );
+            return updatedItem ? updatedItem : prevItem;
+          })
+        );
+        setSelectedItems([]);
+      },
     },
     {
       content: "Incomplate",
@@ -40,7 +55,12 @@ function TodoList() {
     },
     {
       content: "Delete",
-      onAction: () => console.log("Todo: implement bulk 3"),
+      onAction: async () => {
+        const dataNew = await Promise.all(selectedItems.map(id => deleteTodo(id)));
+        setDatas(dataNew);
+        setSelectedItems([]);
+
+      }
     },
   ];
 
@@ -92,22 +112,20 @@ function TodoList() {
   const [value, setValue] = useState("");
   const handleChange = useCallback((newValue) => setValue(newValue), []);
   const [active, setActive] = useState(false);
-  const [checked, setChecked] = useState(false);
-  console.log(checked)
   const toggleActive = useCallback(() => setActive((active) => !active), []);
   const { addTodo, deleteTodo, updateTodo } = useTodoCrud();
   const handleSubmit = async () => {
     if (value.length > 0) {
       const dataNew = await addTodo(value);
-      setDatas((prev) => [dataNew, ...prev]);
+      setDatas(dataNew);
       setActive(!active);
+      setValue("")
       return;
     }
     if (!value) {
       return;
     }
   };
-  const handleCheckbox = useCallback((value) => setChecked(value), []);
   return (
     <Page
       title="Todos"

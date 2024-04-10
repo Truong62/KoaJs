@@ -12,10 +12,11 @@ const fetchApi = async (url, method, body) => {
 }
 export const useTodoCrud = () => {
     const { datas } = useFetchApi("http://localhost:5001/api/todolist/");
+
     const addTodo = async text => {
         const data = { name: text, isCompleted: false }
-        await fetchApi("http://localhost:5001/api/todolist", "POST", data)
-        return data
+        const req =  await fetchApi("http://localhost:5001/api/todolist", "POST", data)
+        return req.data
     };
     const updateTodo = async id => {
         const todoById = datas.find(todo => todo.id === id);
@@ -28,11 +29,13 @@ export const useTodoCrud = () => {
         }
     };
     const deleteTodo = async id => {
-        const newData = datas.filter(todo => todo.id === id);
-        if (newData.length > 0) {
-            const req = await fetchApi("http://localhost:5001/api/todolist/" + id, "DELETE")
-            return req.data
-        }
+        try {
+            const req = await fetchApi("http://localhost:5001/api/todolist/" + id, "DELETE");
+            return req.data;
+          } catch (error) {
+            console.error(error);
+            return { error: true };
+          }
     };
 
     return { addTodo, updateTodo, deleteTodo };

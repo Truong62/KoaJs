@@ -39,10 +39,10 @@ function updateById(id, newData) {
   }
 }
 
-function deleteById(id) {
+async function deleteById(id) {
   const newData = todos.filter((todo) => todo.id !== parseInt(id));
   if (newData.length !== todos.length) {
-    fs.writeFile(
+    await fs.writeFile(
       "./src/database/todoList.json",
       JSON.stringify({ data: newData }),
       (err) => { }
