@@ -7,7 +7,7 @@ const {
     deleteProduct: deleteProduct,
     getAllToView
 } = require("../../database/productRepository");
-const { getAll: getAllBooks } = require("../../database/bookRepository");
+const { getAll: getAllBooks } = require("../../database/toDoRepository");
 
 async function getProducts(ctx) {
     try {

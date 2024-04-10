@@ -7,7 +7,7 @@ import TodoList from "../Todos/TodoList";
 
 function App() {
 
-    const {datas, loading} = useFetchApi("http://localhost:5000/api/todolist/");
+    const {datas, loading} = useFetchApi("http://localhost:5001/api/todolist/");
 
     return (
         <div className="app">

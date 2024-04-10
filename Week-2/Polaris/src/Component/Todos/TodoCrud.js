@@ -10,15 +10,15 @@ const fetchApi = async (url, method, body) => {
     });
 }
 export const useTodoCrud = () => {
-    const {datas,setDatas} = useFetchApi("http://localhost:5001/api/todolist/");
+    const { datas, setDatas } = useFetchApi("http://localhost:5001/api/todolist/");
     const addTodo = async text => {
-        const data = { name: text,isCompleted: false}
-        await fetchApi("http://localhost:5001/api/todolist", "POST",data)
-       return data
+        const data = { name: text, isCompleted: false }
+        await fetchApi("http://localhost:5001/api/todolist", "POST", data)
+        return data
     };
     const updateTodo = async id => {
         const todoById = datas.find(todo => todo.id === id);
-       const Newdata =  await fetchApi("http://localhost:5001/api/todolist/" + id, "PUT", {
+        const Newdata = await fetchApi("http://localhost:5001/api/todolist/" + id, "PUT", {
             name: todoById.name,
             "isCompleted": true
         })
@@ -31,5 +31,5 @@ export const useTodoCrud = () => {
         }
     };
 
-    return {addTodo, updateTodo, deleteTodo};
+    return { addTodo, updateTodo, deleteTodo };
 };

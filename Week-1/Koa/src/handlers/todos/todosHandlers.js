@@ -1,20 +1,19 @@
 const {
-    getAll: getAllBooks,
-    getOne: getOneBook,
-    add: addBook,
+    getAll,
+    getOne,
+    add,
     updateById: updateData,
     deleteById
-} = require("../../database/bookRepository");
+} = require("../../database/toDoRepository");
 
 /**
  *
  * @param ctx
  * @returns {Promise<void>}     
  */
-async function getBooks(ctx) {
+async function getTodos(ctx) {
     try {
-        const books = getAllBooks();
-
+        const books = getAll();
         ctx.body = {
             data: books
         };
@@ -33,10 +32,10 @@ async function getBooks(ctx) {
  * @param ctx
  * @returns {Promise<{data: {author: string, name: string, id: number}}|{success: boolean, error: *}|{message: string, status: string}>}
  */
-async function getBook(ctx) {
+async function getTodo(ctx) {
     try {
-        const {id} = ctx.params;
-        const getCurrentBook = getOneBook(id);
+        const { id } = ctx.params;
+        const getCurrentBook = getOne(id);
         if (getCurrentBook) {
             return ctx.body = {
                 data: getCurrentBook
@@ -51,16 +50,10 @@ async function getBook(ctx) {
         }
     }
 }
-
-/**
- *
- * @param ctx
- * @returns {Promise<{success: boolean, error: *}|{success: boolean}>}
- */
 async function save(ctx) {
     try {
         const postData = ctx.request.body;
-       await addBook(postData);
+        await add(postData);
 
         ctx.status = 201;
         return ctx.body = {
@@ -79,7 +72,7 @@ async function update(ctx) {
         const id = ctx.params.id;
         const newData = ctx.request.body;
 
-       const dataNew =  await updateData(id, newData);
+        const dataNew = await updateData(id, newData);
         ctx.status = 201;
         return ctx.body = {
             dataNew
@@ -92,7 +85,7 @@ async function update(ctx) {
     }
 }
 
-async function deleteBook(ctx) {
+async function deleteTodo(ctx) {
     try {
         const id = ctx.params.id;
         deleteById(id);
@@ -110,9 +103,9 @@ async function deleteBook(ctx) {
 }
 
 module.exports = {
-    getBooks,
-    getBook,
+    getTodos,
+    getTodo,
     save,
     update,
-    deleteBook
+    deleteTodo
 };

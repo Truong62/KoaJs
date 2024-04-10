@@ -16,7 +16,6 @@ const useFetchApi = (url) => {
                 console.error(error);
             }
         };
-
         fetchData();
     }, [url]);
     return { datas, loading, setDatas, setLoading };
