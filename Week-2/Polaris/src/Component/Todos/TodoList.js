@@ -11,14 +11,14 @@ import {
   InlineGrid,
   InlineStack,
   Modal,
-  Frame,  
+  Frame,
   TextField,
 } from "@shopify/polaris";
 import useFetchApi from "../../Hook/useFetchApi";
 import { useState, useCallback } from "react";
 
 function TodoList() {
-  const { datas, setLoading, loadin, setDatas } = useFetchApi(
+  const { datas,setDatas } = useFetchApi(
     "http://localhost:5001/api/todolist/"
   );
 
@@ -39,13 +39,28 @@ function TodoList() {
       onAction: () => console.log("Todo: implement bulk 2"),
     },
     {
-      content: "Dalete",
+      content: "Delete",
       onAction: () => console.log("Todo: implement bulk 3"),
     },
   ];
 
   function renderItem(datas) {
     const { id, name, isCompleted } = datas;
+    const completeOnClick = async (id) => {
+      const req = await updateTodo(id);
+      setDatas((prev) => {
+        return prev.map((item) => {
+          if (item.id === req.id) {
+            return req
+          }
+          return item
+        })
+      })
+    }
+    const deleteOnClick = async (id) => {
+      const req = await deleteTodo(id);
+      setDatas(req)
+    }
 
     return (
       <ResourceItem id={id} accessibilityLabel={name}>
@@ -61,15 +76,13 @@ function TodoList() {
             )}
             <Button
               onClick={() => {
-                const newData = updateTodo(id);
-                setDatas(newData);
+                completeOnClick(id)
               }}
             >
               Complete
             </Button>
             <Button onClick={() => {
-             const newData =  deleteTodo(id)
-              setDatas((prev) => [newData, ...prev]);
+              deleteOnClick(id)
             }}>Delete</Button>
           </InlineStack>
         </InlineGrid>
@@ -80,6 +93,7 @@ function TodoList() {
   const handleChange = useCallback((newValue) => setValue(newValue), []);
   const [active, setActive] = useState(false);
   const [checked, setChecked] = useState(false);
+  console.log(checked)
   const toggleActive = useCallback(() => setActive((active) => !active), []);
   const { addTodo, deleteTodo, updateTodo } = useTodoCrud();
   const handleSubmit = async () => {
