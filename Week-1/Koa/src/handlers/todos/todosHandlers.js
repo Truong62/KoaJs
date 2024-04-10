@@ -45,11 +45,11 @@ async function getTodo(ctx) {
 async function save(ctx) {
     try {
         const postData = ctx.request.body;
-        const req =  await add(postData);
+        const req = await add(postData);
         ctx.status = 201;
         return ctx.body = {
             success: true,
-            data:req
+            data: req
         }
     } catch (e) {
         return ctx.body = {
@@ -67,7 +67,7 @@ async function update(ctx) {
         const dataNew = await updateData(id, newData);
         ctx.status = 201;
         return ctx.body = {
-            dataNew
+            data: dataNew
         }
     } catch (e) {
         return ctx.body = {
@@ -80,11 +80,11 @@ async function update(ctx) {
 async function deleteTodo(ctx) {
     try {
         const id = ctx.params.id;
-        deleteById(id);
-
+        const dataNew = await deleteById(id);
         ctx.status = 201;
         return ctx.body = {
-            success: true
+            success: true,
+            data: dataNew
         }
     } catch (e) {
         return ctx.body = {

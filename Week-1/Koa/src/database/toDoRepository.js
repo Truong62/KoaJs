@@ -13,7 +13,7 @@ function add(data) {
   let id;
   do {
     id = Math.floor(Math.random() * 1000);
-  }while (todos.some((todo) => todo.id === id))
+  } while (todos.some((todo) => todo.id === id))
   const dataNew = [{ id, ...data }, ...todos];
   fs.writeFileSync(
     "./src/database/todoList.json",
@@ -32,18 +32,25 @@ function updateById(id, newData) {
       JSON.stringify({ data: todos }),
       (err) => { }
     );
-    return { data: todos }
+    return todo
+  }
+  if (!todo) {
+    return todos
   }
 }
 
 function deleteById(id) {
   const newData = todos.filter((todo) => todo.id !== parseInt(id));
   if (newData.length !== todos.length) {
-    return fs.writeFile(
+    fs.writeFile(
       "./src/database/todoList.json",
       JSON.stringify({ data: newData }),
       (err) => { }
     );
+    return newData
+  }
+  if (newData.length === todos.length) {
+    return todos
   }
 }
 module.exports = {

@@ -18,17 +18,19 @@ export const useTodoCrud = () => {
     };
     const updateTodo = async id => {
         const todoById = datas.find(todo => todo.id === id);
-        console.log(JSON.stringify({ id: todoById.id, name: todoById.name, "isCompleted": true }))
-        await fetchApi("http://localhost:5001/api/todolist/" + id, "PUT", {
-            id: todoById.id,
-            name: todoById.name,
-            "isCompleted": true
-        })
+        if (todoById) {
+            const req = await fetchApi("http://localhost:5001/api/todolist/" + id, "PUT", {
+                name: todoById.name,
+                "isCompleted": true
+            })
+            return req.data
+        }
     };
     const deleteTodo = async id => {
         const newData = datas.filter(todo => todo.id === id);
         if (newData.length > 0) {
-            await fetchApi("http://localhost:5001/api/todolist/" + id, "DELETE")
+            const req = await fetchApi("http://localhost:5001/api/todolist/" + id, "DELETE")
+            return req.data
         }
     };
     return { addTodo, updateTodo, deleteTodo };
