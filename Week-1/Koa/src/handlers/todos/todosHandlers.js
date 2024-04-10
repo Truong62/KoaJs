@@ -6,11 +6,7 @@ const {
     deleteById
 } = require("../../database/toDoRepository");
 
-/**
- *
- * @param ctx
- * @returns {Promise<void>}     
- */
+
 async function getTodos(ctx) {
     try {
         const books = getAll();
