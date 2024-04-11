@@ -15,8 +15,9 @@ const router = new Router({
 router.get('/todolist', todos.getTodos);
 router.get('/todolist/:id', todos.getTodo);
 router.post('/todolist',todoInputMiddleware, todos.save);
-router.put('/todolist/:id', todos.update);
+router.put('/todolist', todos.update);
 router.delete('/todolist/:id', todos.deleteTodo);
+router.put('/todolists', todos.deletes);
 
 //product
 router.get('/products', productHandler.getProducts);

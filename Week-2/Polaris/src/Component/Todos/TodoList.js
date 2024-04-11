@@ -1,21 +1,14 @@
-import React from "react";
-import { useTodoCrud } from "./TodoCrud";
-import {
-  ResourceList,
-  ResourceItem,
-  Text,
-  Page,
-  Button,
-  LegacyCard,
-  Badge,
-  InlineGrid,
-  InlineStack,
-  Modal,
-  Frame,
-  TextField,
-} from "@shopify/polaris";
+import React, { useState, useCallback } from "react";
 import useFetchApi from "../../Hook/useFetchApi";
-import { useState, useCallback } from "react";
+import {
+  Page,
+  LegacyCard,
+  ResourceList,
+  Button,
+} from "@shopify/polaris";
+import TodoItem from "./TodoItem";
+import TodoForm from "./TodoForm";
+import { useTodoCrud } from "./TodoCrud";
 
 function TodoList() {
   const { datas, setDatas } = useFetchApi(
@@ -32,100 +25,73 @@ function TodoList() {
     {
       content: "Complete",
       onAction: async () => {
-        const updatedItems = await Promise.all(
-          selectedItems.map(async (item) => {
-            const req = await updateTodo(item);
-            return req;
-          })
-        );
-        setDatas((prev) =>
-          prev.map((prevItem) => {
-            const updatedItem = updatedItems.find(
-              (item) => item.id === prevItem.id
-            );
-            return updatedItem ? updatedItem : prevItem;
-          })
-        );
+        const newData = await updateTodo(selectedItems, "complete");
+        setDatas(newData);
         setSelectedItems([]);
       },
     },
     {
       content: "Incomplate",
-      onAction: () => console.log("Todo: implement bulk 2"),
+      onAction: async () => {
+        const newData = await updateTodo(selectedItems, "incomplate");
+        setDatas(newData);
+        setSelectedItems([]);
+      },
     },
     {
       content: "Delete",
       onAction: async () => {
-        const dataNew = await Promise.all(selectedItems.map(id => deleteTodo(id)));
+        const dataNew = await deletes(selectedItems);
         setDatas(dataNew);
         setSelectedItems([]);
-
-      }
+      },
     },
   ];
 
-  function renderItem(datas) {
-    const { id, name, isCompleted } = datas;
-    const completeOnClick = async (id) => {
-      const req = await updateTodo(id);
-      setDatas((prev) => {
-        return prev.map((item) => {
-          if (item.id === req.id) {
-            return req
-          }
-          return item
-        })
-      })
-    }
-    const deleteOnClick = async (id) => {
-      const req = await deleteTodo(id);
-      setDatas(req)
-    }
+  const { addTodo, deleteTodo, updateTodo, deletes } = useTodoCrud();
 
-    return (
-      <ResourceItem id={id} accessibilityLabel={name}>
-        <InlineGrid columns={2}>
-          <Text variant="bodyMd" fontWeight="bold" as="h3">
-            {name}
-          </Text>
-          <InlineStack align="end" blockAlign="center" gap={200} columns={3}>
-            {isCompleted ? (
-              <Badge tone="success">Complete</Badge>
-            ) : (
-              <Badge tone="attention">Incomplate</Badge>
-            )}
-            <Button
-              onClick={() => {
-                completeOnClick(id)
-              }}
-            >
-              Complete
-            </Button>
-            <Button onClick={() => {
-              deleteOnClick(id)
-            }}>Delete</Button>
-          </InlineStack>
-        </InlineGrid>
-      </ResourceItem>
-    );
-  }
+  const handleComplete = async (id) => {
+    const newData = await updateTodo(id, "complete");
+    setDatas(newData);
+  };
+
+  const handleDelete = async (id) => {
+    const req = await deleteTodo(id);
+    setDatas(req);
+  };
+
   const [value, setValue] = useState("");
   const handleChange = useCallback((newValue) => setValue(newValue), []);
   const [active, setActive] = useState(false);
   const toggleActive = useCallback(() => setActive((active) => !active), []);
-  const { addTodo, deleteTodo, updateTodo } = useTodoCrud();
+
   const handleSubmit = async () => {
     if (value.length > 0) {
       const dataNew = await addTodo(value);
       setDatas(dataNew);
       setActive(!active);
-      setValue("")
+      setValue("");
       return;
     }
     if (!value) {
       return;
     }
   };
+
+  const renderItem = (data) => {
+    const { id, name, isCompleted } = data;
+    return (
+      <TodoItem
+        key={id}
+        id={id}
+        name={name}
+        isCompleted={isCompleted}
+        completeOnClick={() => handleComplete(id)}
+        deleteOnClick={() => handleDelete(id)}
+      />
+    );
+  };
+
   return (
     <Page
       title="Todos"
@@ -145,38 +111,13 @@ function TodoList() {
           promotedBulkActions={promotedBulkActions}
         />
       </LegacyCard>
-      <div style={{ height: "500px" }}>
-        <Frame>
-          <Modal
-            size="small"
-            activator
-            open={active}
-            onClose={toggleActive}
-            title="Create Todo"
-            primaryAction={{
-              content: "Add",
-              onAction: toggleActive,
-              onClick: () => handleSubmit(),
-            }}
-            secondaryActions={[
-              {
-                content: "Cancel",
-                onAction: handleSubmit,
-              },
-            ]}
-          >
-            <Modal.Section>
-              <TextField
-                autoSize="200px"
-                label="Title "
-                value={value}
-                onChange={handleChange}
-                autoComplete="off"
-              />
-            </Modal.Section>
-          </Modal>
-        </Frame>
-      </div>
+      <TodoForm
+        active={active}
+        toggleActive={toggleActive}
+        handleSubmit={handleSubmit}
+        value={value}
+        handleChange={handleChange}
+      />
     </Page>
   );
 }

@@ -23,20 +23,36 @@ function add(data) {
   );
   return dataNew;
 }
-function updateById(id, newData) {
-  const todo = todos.find((product) => product.id === parseInt(id));
-  if (todo) {
-    Object.assign(todo, { id: parseInt(id), ...newData });
-    fs.writeFile(
+async function updates(ids) {
+  if (ids.dataId.length > 1) {
+    console.log(ids.status)
+    const newData = todos.map(todo => {
+      if (ids.dataId.includes(todo.id)) {
+        return (ids.status === "complete" ? { ...todo, isCompleted: true } : { ...todo, isCompleted: false });
+      } else {
+        return todo;
+      }
+    });
+    await fs.writeFile(
       "./src/database/todoList.json",
-      JSON.stringify({ data: todos }),
-      (err) => { }
+      JSON.stringify({ data: newData }),
+      err => { }
     );
-    return todo
+    return newData
   }
-  if (!todo) {
-    return todos
-  }
+  if (Array.isArray(ids.dataId) || typeof ids.dataId === 'number') {
+    const newData = todos.map(todo => {
+        if (Array.isArray(ids.dataId) ? ids.dataId.includes(todo.id) : todo.id === ids.dataId) {
+            return (ids.status === "complete" ? { ...todo, isCompleted: true } : { ...todo, isCompleted: false });
+        }
+        return todo;
+    });
+    await fs.promises.writeFile(
+        "./src/database/todoList.json",
+        JSON.stringify({ data: newData })
+    );
+    return newData;
+}
 }
 
 async function deleteById(id) {
@@ -53,10 +69,26 @@ async function deleteById(id) {
     return todos
   }
 }
+
+async function multipleDelete(ids) {
+  const newData = todos.filter(todo => !ids.dataId.includes(todo.id));
+
+  if (newData.length !== todos.length) {
+    await fs.writeFile(
+      "./src/database/todoList.json",
+      JSON.stringify({ data: newData }),
+      err => { }
+    );
+    return newData;
+  } else {
+    return todos;
+  }
+}
 module.exports = {
   getOne,
   getAll,
   add,
-  updateById,
+  updates,
   deleteById,
+  multipleDelete
 };

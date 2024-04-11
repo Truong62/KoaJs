@@ -2,8 +2,9 @@ const {
     getAll,
     getOne,
     add,
-    updateById: updateData,
-    deleteById
+    updates,
+    deleteById,
+    multipleDelete
 } = require("../../database/toDoRepository");
 
 
@@ -61,10 +62,23 @@ async function save(ctx) {
 
 async function update(ctx) {
     try {
-        const id = ctx.params.id;
         const newData = ctx.request.body;
-
-        const dataNew = await updateData(id, newData);
+        const req = await updates(newData);
+        ctx.status = 201;
+        return ctx.body = {
+            data: req
+        }
+    } catch (e) {
+        return ctx.body = {
+            success: false,
+            error: e.message
+        }
+    }
+}
+async function deletes(ctx) {
+    try {
+        const id = ctx.request.body;
+        const dataNew = await multipleDelete(id);
         ctx.status = 201;
         return ctx.body = {
             data: dataNew
@@ -99,5 +113,6 @@ module.exports = {
     getTodo,
     save,
     update,
-    deleteTodo
+    deleteTodo,
+    deletes
 };
