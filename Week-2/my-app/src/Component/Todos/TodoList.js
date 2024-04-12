@@ -8,14 +8,7 @@ function TodoList() {
     const { datas, loading, setDatas } = useFetchApi("http://localhost:5001/api/todolist/");
     const updateOnClick = async (id) => {
        const req =  await updateTodo(id)
-       setDatas((prev) =>{
-        return prev.map((item) => {
-            if(item.id === req.id){
-                return req
-            }
-            return item
-        })
-       })
+       setDatas(req)
     }
     const deleteOnClick = async (id) => {
        const req =  await deleteTodo(id)
