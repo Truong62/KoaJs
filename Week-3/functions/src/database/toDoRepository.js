@@ -1,21 +1,29 @@
 const fs = require("fs");
-const { data: todos } = require("./todoList.json");
+const db = require("./connectFirebase")
 
-function getAll() {
-  return todos;
+const getTodosList = async () => {
+  const citiesRef = db.collection('cities');
+  const snapshot = await citiesRef.get();
+  const todos = snapshot.docs.map(doc => doc.data())
+  return todos
+}
+
+async function getAll() {
+  const req = await getTodosList()
+  return req
 }
 
 function getOne(id) {
   return todos.find((todo) => todo.id === parseInt(id));
 }
 
-async function add(data) {
+function add(data) {
   let id;
   do {
     id = Math.floor(Math.random() * 1000);
   } while (todos.some((todo) => todo.id === id))
   const dataNew = [{ id, ...data }, ...todos];
-  await fs.writeFileSync(
+  fs.writeFileSync(
     "./src/database/todoList.json",
     JSON.stringify({
       data: dataNew,
@@ -42,17 +50,17 @@ async function updates(ids) {
   }
   if (Array.isArray(ids.dataId) || typeof ids.dataId === 'number') {
     const newData = todos.map(todo => {
-        if (Array.isArray(ids.dataId) ? ids.dataId.includes(todo.id) : todo.id === ids.dataId) {
-            return (ids.status === "complete" ? { ...todo, isCompleted: true } : { ...todo, isCompleted: false });
-        }
-        return todo;
+      if (Array.isArray(ids.dataId) ? ids.dataId.includes(todo.id) : todo.id === ids.dataId) {
+        return (ids.status === "complete" ? { ...todo, isCompleted: true } : { ...todo, isCompleted: false });
+      }
+      return todo;
     });
     await fs.promises.writeFile(
-        "./src/database/todoList.json",
-        JSON.stringify({ data: newData })
+      "./src/database/todoList.json",
+      JSON.stringify({ data: newData })
     );
     return newData;
-}
+  }
 }
 
 async function deleteById(id) {
