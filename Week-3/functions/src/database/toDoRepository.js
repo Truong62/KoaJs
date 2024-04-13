@@ -1,39 +1,26 @@
-const fs = require("fs");
 const db = require("./connectFirebase")
 
-const getTodosList = async () => {
-  const citiesRef = db.collection('cities');
+async function getAll() {
+  const citiesRef = db.collection('Products');
   const snapshot = await citiesRef.get();
   const todos = snapshot.docs.map(doc => doc.data())
   return todos
 }
 
-async function getAll() {
-  const req = await getTodosList()
-  return req
+async function getOne(id) {
+  const cityRef = db.collection('Products').doc(id);
+  const doc = await cityRef.get();
+  return doc.data()
 }
 
-function getOne(id) {
-  return todos.find((todo) => todo.id === parseInt(id));
-}
-
-function add(data) {
-  let id;
-  do {
-    id = Math.floor(Math.random() * 1000);
-  } while (todos.some((todo) => todo.id === id))
-  const dataNew = [{ id, ...data }, ...todos];
-  fs.writeFileSync(
-    "./src/database/todoList.json",
-    JSON.stringify({
-      data: dataNew,
-    })
-  );
-  return dataNew;
+async function add(data) {
+  console.log(data)
+  const res = await db.collection('Products').add(data);
+  const dataNew=  await db.collection('Products').doc(res.id).get();
+  return dataNew.data()
 }
 async function updates(ids) {
   if (ids.dataId.length > 1) {
-    console.log(ids.status)
     const newData = todos.map(todo => {
       if (ids.dataId.includes(todo.id)) {
         return (ids.status === "complete" ? { ...todo, isCompleted: true } : { ...todo, isCompleted: false });

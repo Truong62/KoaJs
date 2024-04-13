@@ -6,4 +6,4 @@ const app = new Koa();
 app.use(routes.routes());
 app.use(routes.allowedMethods());
 
-module.exports  = app
+module.exports = app;

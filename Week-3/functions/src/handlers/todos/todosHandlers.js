@@ -11,7 +11,6 @@ const {
 async function getTodos(ctx) {
     try {
         const books = await getAll();
-        console.log(books)
         ctx.body = {
             data: books
         };
@@ -25,11 +24,10 @@ async function getTodos(ctx) {
     }
 }
 
-
 async function getTodo(ctx) {
     try {
         const { id } = ctx.params;
-        const getCurrentBook = getOne(id);
+        const getCurrentBook = await getOne(id);
         if (getCurrentBook) {
             return ctx.body = {
                 data: getCurrentBook
@@ -46,7 +44,7 @@ async function getTodo(ctx) {
 }
 async function save(ctx) {
     try {
-        const postData = ctx.request.body;
+        const postData = await ctx.req.body;
         const req = await add(postData);
         ctx.status = 201;
         return ctx.body = {
@@ -63,7 +61,7 @@ async function save(ctx) {
 
 async function update(ctx) {
     try {
-        const newData = ctx.request.body;
+        const newData = ctx.req.body;
         const req = await updates(newData);
         ctx.status = 201;
         return ctx.body = {
