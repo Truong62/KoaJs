@@ -1,82 +1,64 @@
 const db = require("./connectFirebase")
 
 async function getAll() {
-  const citiesRef = db.collection('Products');
+  const citiesRef = db.collection('todos');
   const snapshot = await citiesRef.get();
   const todos = snapshot.docs.map(doc => doc.data())
   return todos
 }
 
 async function getOne(id) {
-  const cityRef = db.collection('Products').doc(id);
+  const cityRef = db.collection('todos').doc(id);
   const doc = await cityRef.get();
   return doc.data()
 }
 
 async function add(data) {
-  console.log(data)
-  const res = await db.collection('Products').add(data);
-  const dataNew=  await db.collection('Products').doc(res.id).get();
+  const res = await db.collection('todos').add({
+    ...data,
+    isCompleted: false
+  });
+  const dataNew = await db.collection('todos').doc(res.id).get();
   return dataNew.data()
 }
-async function updates(ids) {
-  if (ids.dataId.length > 1) {
-    const newData = todos.map(todo => {
-      if (ids.dataId.includes(todo.id)) {
-        return (ids.status === "complete" ? { ...todo, isCompleted: true } : { ...todo, isCompleted: false });
-      } else {
-        return todo;
-      }
-    });
-    await fs.writeFile(
-      "./src/database/todoList.json",
-      JSON.stringify({ data: newData }),
-      err => { }
-    );
-    return newData
-  }
-  if (Array.isArray(ids.dataId) || typeof ids.dataId === 'number') {
-    const newData = todos.map(todo => {
-      if (Array.isArray(ids.dataId) ? ids.dataId.includes(todo.id) : todo.id === ids.dataId) {
-        return (ids.status === "complete" ? { ...todo, isCompleted: true } : { ...todo, isCompleted: false });
-      }
-      return todo;
-    });
-    await fs.promises.writeFile(
-      "./src/database/todoList.json",
-      JSON.stringify({ data: newData })
-    );
-    return newData;
+async function updates(data) {
+  try {
+    const docRef = db.collection('todos').doc(data.id);
+    let updatedData;
+
+    if (data.status === "complete") {
+      await docRef.update({ isCompleted: true });
+    } else if (data.status === "incomplete") {
+      await docRef.update({ isCompleted: false });
+    }
+
+    const doc = await docRef.get();
+    updatedData = doc.data();
+
+    return updatedData;
+  } catch (error) {
+    console.error(error);
+    throw error;
   }
 }
 
 async function deleteById(id) {
-  const newData = todos.filter((todo) => todo.id !== parseInt(id));
-  if (newData.length !== todos.length) {
-    await fs.writeFile(
-      "./src/database/todoList.json",
-      JSON.stringify({ data: newData }),
-      (err) => { }
-    );
-    return newData
-  }
-  if (newData.length === todos.length) {
-    return todos
-  }
+  const res = await db.collection('cities').doc(id).delete();
+  const newData = await getAll(); 
+  return newData;
 }
 
 async function multipleDelete(ids) {
-  const newData = todos.filter(todo => !ids.dataId.includes(todo.id));
+  const deletePromises = ids.map(id => deleteById(id));
 
-  if (newData.length !== todos.length) {
-    await fs.writeFile(
-      "./src/database/todoList.json",
-      JSON.stringify({ data: newData }),
-      err => { }
-    );
+  try {
+    await Promise.all(deletePromises);
+    const newData = await getAll();
+    await updateDataOnFirebase(newData);
     return newData;
-  } else {
-    return todos;
+  } catch (error) {
+    console.error("Error deleting multiple items:", error);
+    throw error;
   }
 }
 module.exports = {
