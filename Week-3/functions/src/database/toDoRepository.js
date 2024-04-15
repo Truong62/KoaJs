@@ -8,7 +8,7 @@ async function getAll() {
 }
 
 async function getOne(id) {
-  const cityRef = db.collection('todos').doc(id);
+  const cityRef = await db.collection('todos').doc(id);
   const doc = await cityRef.get();
   return doc.data()
 }
@@ -23,7 +23,7 @@ async function add(data) {
 }
 async function updates(data) {
   try {
-    const docRef = db.collection('todos').doc(data.id);
+    const docRef =await db.collection('todos').doc(data.id);
     let updatedData;
 
     if (data.status === "complete") {

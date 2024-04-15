@@ -10,7 +10,7 @@ const {
 
 async function getTodos(ctx) {
     try {
-        const books = getAll();
+        const books = await getAll();
         ctx.body = {
             data: books
         };
@@ -28,7 +28,7 @@ async function getTodos(ctx) {
 async function getTodo(ctx) {
     try {
         const { id } = ctx.params;
-        const getCurrentBook = getOne(id);
+        const getCurrentBook =await getOne(id);
         if (getCurrentBook) {
             return ctx.body = {
                 data: getCurrentBook
